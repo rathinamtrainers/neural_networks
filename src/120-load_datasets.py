@@ -12,7 +12,7 @@ transform = transforms.Compose([
 # 2. Download and load the training data
 train_dataset = torchvision.datasets.MNIST(
     root='./data',
-    train=True,
+    train=True,         # Set to False to load test data
     transform=transform,
     download=True
 )
