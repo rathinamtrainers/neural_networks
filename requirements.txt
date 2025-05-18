@@ -2,3 +2,4 @@ python-dotenv
 matplotlib
 tk
 scikit-learn
+pandas
