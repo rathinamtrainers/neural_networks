@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 # Step-1: Generate synthetic dataset
 X = torch.unsqueeze(torch.linspace(-5, 5, 100), dim=1)
@@ -24,7 +24,7 @@ class DeepNN(nn.Module):
     def forward(self, x):
         return self.model(x)
 
-model = DeepNN
+model = DeepNN()
 
 # Step-3: Loss and Optimizer
 criterion = nn.MSELoss()
@@ -49,9 +49,16 @@ for epoch in range(epochs):
         print(f"Epoch [{epoch + 1}/{epochs}], Loss: {loss.item():.4f}")
 
 # Step-5: Plot loss curve
-plt.plot(losses)
-plt.title("Training Loss Over Epochs")
-plt.xlabel("Epoch")
-plt.ylabel("MSE Loss")
-plt.show()
+# plt.plot(losses)
+# plt.title("Training Loss Over Epochs")
+# plt.xlabel("Epoch")
+# plt.ylabel("MSE Loss")
+# plt.show()
+#
+
+# Step-6: Test the model
+model.eval()
+test_input = torch.tensor([[10.0]])
+test_output = model(test_input)
+print(f"Input: {test_input.item():.4f}, Output: {test_output.item():.4f}")
 
