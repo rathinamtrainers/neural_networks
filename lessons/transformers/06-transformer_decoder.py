@@ -251,7 +251,10 @@ def visualize_masked_attention():
     
     # Plot self-attention weights
     ax = axes[0, 1]
-    self_attn = attn_weights['self_attention'][0].detach().mean(dim=1).squeeze().numpy()
+    self_attn = attn_weights['self_attention'][0].detach()
+    if len(self_attn.shape) > 2:
+        self_attn = self_attn.mean(dim=0)  # Average over heads if needed
+    self_attn = self_attn.numpy()
     im = ax.imshow(self_attn, cmap='Blues', vmin=0, vmax=1)
     ax.set_title('Masked Self-Attention Weights')
     ax.set_xlabel('Key Position')
@@ -260,7 +263,10 @@ def visualize_masked_attention():
     
     # Plot cross-attention weights
     ax = axes[1, 0]
-    cross_attn = attn_weights['cross_attention'][0].detach().mean(dim=1).squeeze().numpy()
+    cross_attn = attn_weights['cross_attention'][0].detach()
+    if len(cross_attn.shape) > 2:
+        cross_attn = cross_attn.mean(dim=0)  # Average over heads if needed
+    cross_attn = cross_attn.numpy()
     im = ax.imshow(cross_attn, cmap='Greens', aspect='auto')
     ax.set_title('Cross-Attention Weights\n(Decoder attending to Encoder)')
     ax.set_xlabel('Encoder Position')

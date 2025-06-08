@@ -3,3 +3,6 @@ matplotlib
 tk
 scikit-learn
 pandas
+seaborn
+torch
+torchvision

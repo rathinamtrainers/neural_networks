@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
+# from tqdm import tqdm  # Not available, using simple progress
 import time
 
 
@@ -237,8 +237,7 @@ def train_transformer(model, train_loader, val_loader, num_epochs=20,
         train_loss = 0
         train_steps = 0
         
-        progress_bar = tqdm(train_loader, desc=f"Epoch {epoch+1}/{num_epochs}")
-        for src, tgt in progress_bar:
+        for batch_idx, (src, tgt) in enumerate(train_loader):
             src, tgt = src.to(device), tgt.to(device)
             
             # Teacher forcing: use ground truth as input
@@ -263,7 +262,8 @@ def train_transformer(model, train_loader, val_loader, num_epochs=20,
             train_loss += loss.item()
             train_steps += 1
             
-            progress_bar.set_postfix({'loss': f'{loss.item():.4f}'})
+            if batch_idx % 10 == 0:
+                print(f"  Batch {batch_idx}/{len(train_loader)}, Loss: {loss.item():.4f}")
         
         avg_train_loss = train_loss / train_steps
         train_losses.append(avg_train_loss)

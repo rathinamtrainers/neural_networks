@@ -11,8 +11,33 @@ import torch.nn as nn
 import torch.nn.functional as F
 import matplotlib.pyplot as plt
 import numpy as np
-from multi_head_attention import MultiHeadAttention
-from positional_encoding import PositionalEncoding
+# Using PyTorch's built-in MultiheadAttention instead of custom implementation
+
+class PositionalEncoding(nn.Module):
+    """Sinusoidal positional encoding."""
+    
+    def __init__(self, embed_dim, max_len=5000, dropout=0.1):
+        super(PositionalEncoding, self).__init__()
+        self.dropout = nn.Dropout(dropout)
+        
+        pe = torch.zeros(max_len, embed_dim)
+        position = torch.arange(0, max_len).unsqueeze(1).float()
+        
+        div_term = torch.exp(torch.arange(0, embed_dim, 2).float() * 
+                            -(np.log(10000.0) / embed_dim))
+        
+        pe[:, 0::2] = torch.sin(position * div_term)
+        if embed_dim % 2 == 0:
+            pe[:, 1::2] = torch.cos(position * div_term)
+        else:
+            pe[:, 1::2] = torch.cos(position * div_term[:-1])
+        
+        pe = pe.unsqueeze(0)
+        self.register_buffer('pe', pe)
+        
+    def forward(self, x):
+        x = x + self.pe[:, :x.size(1)]
+        return self.dropout(x)
 
 
 class FeedForward(nn.Module):
@@ -69,7 +94,7 @@ class TransformerEncoderBlock(nn.Module):
         super(TransformerEncoderBlock, self).__init__()
         
         # Multi-head attention
-        self.attention = MultiHeadAttention(embed_dim, num_heads, dropout)
+        self.attention = nn.MultiheadAttention(embed_dim, num_heads, dropout=dropout, batch_first=True)
         
         # Feed-forward network
         self.feed_forward = FeedForward(embed_dim, ff_dim, dropout)
@@ -93,7 +118,7 @@ class TransformerEncoderBlock(nn.Module):
             Output tensor of shape (batch_size, seq_len, embed_dim)
         """
         # Self-attention with residual connection and layer norm
-        attn_output, _ = self.attention(x, x, x, mask)
+        attn_output, _ = self.attention(x, x, x, key_padding_mask=mask)
         x = self.norm1(x + self.dropout(attn_output))
         
         # Feed-forward with residual connection and layer norm
@@ -177,7 +202,10 @@ def visualize_transformer_block():
     # Hook to capture intermediate values
     def hook_fn(name):
         def hook(module, input, output):
-            intermediate_outputs[name] = output.detach()
+            if isinstance(output, tuple):
+                intermediate_outputs[name] = output[0].detach()
+            else:
+                intermediate_outputs[name] = output.detach()
         return hook
     
     # Register hooks
@@ -207,7 +235,7 @@ def visualize_transformer_block():
     
     # Plot attention output
     ax = axes[1]
-    attn_out = intermediate_outputs['attention'][0]
+    attn_out = intermediate_outputs['attention']
     im = ax.imshow(attn_out[0].numpy(), aspect='auto', cmap='viridis')
     ax.set_title('After Multi-Head Attention')
     ax.set_xlabel('Embedding Dimension')
@@ -234,7 +262,7 @@ def visualize_transformer_block():
     
     # Plot final output
     ax = axes[4]
-    im = ax.imshow(output[0].numpy(), aspect='auto', cmap='viridis')
+    im = ax.imshow(output[0].detach().numpy(), aspect='auto', cmap='viridis')
     ax.set_title('Final Output (After Add & Norm 2)')
     ax.set_xlabel('Embedding Dimension')
     ax.set_ylabel('Position')
@@ -290,9 +318,9 @@ def test_transformer_encoder():
     # Test with padding mask
     print("\nTesting with Padding Mask:")
     
-    # Create a mask where last 5 positions are padded
-    mask = torch.ones(batch_size, seq_len, seq_len)
-    mask[:, :, -5:] = 0  # Mask out last 5 positions
+    # Create a padding mask where last 5 positions are padded
+    mask = torch.zeros(batch_size, seq_len, dtype=torch.bool)
+    mask[:, -5:] = True  # Mask out last 5 positions
     
     output_masked = encoder(x, mask)
     print(f"Masked output shape: {output_masked.shape}")

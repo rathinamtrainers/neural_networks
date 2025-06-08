@@ -150,7 +150,7 @@ def visualize_multi_head_attention():
     # Plot attention weights for each head
     for head_idx in range(num_heads):
         ax = axes[head_idx]
-        im = ax.imshow(attention_per_head[0, head_idx].numpy(), cmap='Blues', aspect='auto')
+        im = ax.imshow(attention_per_head[0, head_idx].detach().numpy(), cmap='Blues', aspect='auto')
         ax.set_title(f'Head {head_idx + 1} Attention Weights')
         ax.set_xlabel('Key Positions')
         ax.set_ylabel('Query Positions')
@@ -160,7 +160,7 @@ def visualize_multi_head_attention():
     
     # Plot averaged attention weights
     ax = axes[4]
-    im = ax.imshow(attention_weights_avg[0].numpy(), cmap='Greens', aspect='auto')
+    im = ax.imshow(attention_weights_avg[0].detach().numpy(), cmap='Greens', aspect='auto')
     ax.set_title('Averaged Attention Weights')
     ax.set_xlabel('Key Positions')
     ax.set_ylabel('Query Positions')
@@ -200,7 +200,7 @@ def visualize_multi_head_attention():
     
     # Visualize cross-attention
     plt.figure(figsize=(8, 6))
-    plt.imshow(cross_attention[0].numpy(), cmap='Purples', aspect='auto')
+    plt.imshow(cross_attention[0].detach().numpy(), cmap='Purples', aspect='auto')
     plt.title('Cross-Attention Weights\n(Decoder attending to Encoder)')
     plt.xlabel('Encoder Positions')
     plt.ylabel('Decoder Positions')

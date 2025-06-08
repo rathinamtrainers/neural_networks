@@ -56,7 +56,7 @@ class TransformerBlock(nn.Module):
         
     def forward(self, x, mask=None):
         # Self-attention
-        attn_out, _ = self.attention(x, x, x, attn_mask=mask)
+        attn_out, _ = self.attention(x, x, x, key_padding_mask=mask)
         x = self.norm1(x + self.dropout(attn_out))
         
         # Feed-forward
@@ -171,6 +171,8 @@ class Transformer(nn.Module):
             dropout: Dropout rate
         """
         super(Transformer, self).__init__()
+        
+        self.embed_dim = embed_dim
         
         # Embeddings
         self.src_embedding = nn.Embedding(src_vocab_size, embed_dim)
