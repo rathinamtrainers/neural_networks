@@ -14,11 +14,17 @@ class DeepNN(nn.Module):
 
         # Input (1D) → 64 → ReLU → 64 → ReLU → Output (1D)
         self.model = nn.Sequential(
-            nn.Linear(1, 64),
+            nn.Linear(1, 128),
+            nn.ReLU(),
+            nn.Linear(128, 128),
+            nn.ReLU(),
+            nn.Linear(128, 64),
             nn.ReLU(),
             nn.Linear(64, 64),
             nn.ReLU(),
-            nn.Linear(64, 1)
+            nn.Linear(64, 32),
+            nn.ReLU(),
+            nn.Linear(32, 1)
         )
 
     def forward(self, x):
