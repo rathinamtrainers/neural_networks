@@ -78,6 +78,11 @@ class MultiHeadAttention(nn.Module):
         V = self.w_v(value).view(batch_size, seq_len, self.num_heads, self.d_k).transpose(1, 2)
         
         # 2. Apply attention
+        # If mask is provided, expand it for all heads
+        if mask is not None:
+            if mask.dim() == 3:  # (batch_size, seq_len, seq_len)
+                mask = mask.unsqueeze(1)  # (batch_size, 1, seq_len, seq_len)
+        
         attention_output, attention_weights = self.scaled_dot_product_attention(Q, K, V, mask)
         
         # 3. Concatenate heads
